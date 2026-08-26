@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 280" role="img">
+  <rect width="200" height="280" rx="10" fill="#1e293b"/>
+  <rect x="10" y="10" width="180" height="260" rx="6" fill="none" stroke="#f3e8d8" stroke-width="4"/>
+  <rect x="18" y="18" width="164" height="244" rx="4" fill="none" stroke="#1c1917" stroke-width="2"/>
+  <g transform="translate(100,112)" fill="#f3e8d8" stroke="#1c1917" stroke-width="3.5" stroke-linejoin="round">
+    <ellipse cx="0" cy="-28" rx="36" ry="42"/>
+    <path d="M-44,8 Q-48,52 0,58 Q48,52 44,8 Q24,28 0,30 Q-24,28 -44,8 Z"/>
+    <path d="M-30,-58 Q0,-78 34,-52 Q18,-38 0,-42 Q-18,-46 -30,-58 Z" fill="#e8b84a"/>
+  </g>
+  <text x="100" y="232" text-anchor="middle" font-family="Georgia, serif" font-size="22" font-weight="700" fill="#f3e8d8" stroke="#1c1917" stroke-width="1.2" letter-spacing="2">FIGURES</text>
+</svg>
