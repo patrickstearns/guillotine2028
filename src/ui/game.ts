@@ -297,7 +297,6 @@ function targetHint(effect: ActionEffect, lineLen: number, clericalStep = -1, la
     case 'give_front_to_player':
     case 'skip_opponent_turn':
     case 'penalty':
-    case 'front_penalty':
     case 'random_lose_noble':
     case 'swap_hands':
       return `<p>Click a player on the left.</p>`;

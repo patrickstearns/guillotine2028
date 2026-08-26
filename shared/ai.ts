@@ -380,28 +380,31 @@ export function aiTakeTurn(engine: GuillotineEngine): void {
       if (score > best.score) best = { cardId: card.instanceId, score };
     } else {
       let nextLine = state.line;
-      if (def.effect.kind === 'front_to_end' && state.line.length) {
+      const effect = def.effect;
+      if (effect.kind === 'front_to_end' && state.line.length) {
         nextLine = [...state.line.slice(1), state.line[0]];
-      } else if (def.effect.kind === 'reverse_line') {
+      } else if (effect.kind === 'reverse_line') {
         nextLine = [...state.line].reverse();
-      } else if (def.effect.kind === 'move_named_to_front') {
+      } else if (effect.kind === 'move_named_to_front') {
+        const nobleId = effect.nobleId;
         nextLine = lineWithMovedToFront(
           state.line,
           (n) =>
-            n.defId === def.effect.nobleId ||
-            n.defId.startsWith(def.effect.nobleId) ||
-            nobleById(n.defId)?.id.replace(/_\d+$/, '') === def.effect.nobleId,
+            n.defId === nobleId ||
+            n.defId.startsWith(nobleId) ||
+            nobleById(n.defId)?.id.replace(/_\d+$/, '') === nobleId,
         );
-      } else if (def.effect.kind === 'move_ability_to_front') {
-        if (def.effect.ability === 'master_spy') continue;
+      } else if (effect.kind === 'move_ability_to_front') {
+        if (effect.ability === 'master_spy') continue;
+        const ability = effect.ability;
         nextLine = lineWithMovedToFront(
           state.line,
-          (n) => nobleById(n.defId)?.ability === def.effect.ability,
+          (n) => nobleById(n.defId)?.ability === ability,
         );
       }
       const expectedFront =
-        def.effect.kind === 'draw_skip_collect' ? 0 : scoreLineAfterAction(engine, me.id, nextLine);
-      const score = expectedFront + immediateGain(def.effect, skipScore);
+        effect.kind === 'draw_skip_collect' ? 0 : scoreLineAfterAction(engine, me.id, nextLine);
+      const score = expectedFront + immediateGain(effect, skipScore);
       if (score > best.score) best = { cardId: card.instanceId, score };
     }
   }
