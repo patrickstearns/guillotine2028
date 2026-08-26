@@ -24,4 +24,4 @@ ENV PORT=3001
 EXPOSE 3001
 
 USER node
-CMD ["node", "dist-server/index.js"]
+CMD ["node", "dist-server/server/index.js"]
