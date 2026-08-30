@@ -10,9 +10,9 @@ Suits are **Executive**, **Legislative**, **Judicial**, and **Media**. **Martyr*
 | Couchfucker | JD Vance | 4 | |
 | Naziferatu | Stephen Miller | 3 | Ends the day |
 | Secretary of War Crimes | Pete Hegseth | 3 | |
-| Tariff Tsar | Howard Lutnick | 3 | |
-| Briefcase | Pam Bondi | 2 | Draw action |
-| Loyalty File | Kash Patel | 2 | Draw action |
+| Tariff Tyrant | Howard Lutnick | 3 | |
+| Scientologist General | Pam Bondi | 2 | Draw action |
+| Federal Boob Director | Kash Patel | 2 | Draw action |
 | Puppykiller | Kristi Noem | 2 | +2 with Decoy Plane |
 | Decoy Plane | Karoline Leavitt | 2 | +2 with Puppykiller |
 | Grand Nagus | Vivek Ramaswamy | 2 | Fast noble |
@@ -27,17 +27,17 @@ Suits are **Executive**, **Legislative**, **Judicial**, and **Media**. **Martyr*
 | Overzealous Staffer | (generic) ×5 | ★ | Score = count of staffers |
 | The Turtle | Mitch McConnell | 4 | Master spy |
 | Theocrat | Mike Johnson | 4 | Adds noble to end |
-| Gavel Ghost | Kevin McCarthy | 3 | |
+| Kneepads McGee | Kevin McCarthy | 3 | |
 | Flaccid Wolverine | Ted Cruz | 2 | Adds noble to end |
 | Inside Traitor | Nancy Pelosi | 2 | |
-| Israel Firster | Chuck Schumer | 2 | |
+| Israel Uber Alles | Chuck Schumer | 2 | |
 
 ## Judicial
 | Moniker | Figure | Pts | Notes |
 |---|---|---|---|
 | Tax Dodge | John Roberts | 4 | |
-| Flag Neighbor | Samuel Alito | 3 | |
-| RV Recusal | Clarence Thomas | 3 | |
+| Abortion Autarch | Samuel Alito | 3 | |
+| 'Uncle' Thomas | Clarence Thomas | 3 | |
 | Handmaid | Amy Coney Barrett | 2 | Blocks actions at front |
 | Textualist | Neil Gorsuch | 2 | Blocks actions at front |
 | Beer Bro | Brett Kavanaugh | 2 | |
@@ -49,12 +49,12 @@ Suits are **Executive**, **Legislative**, **Judicial**, and **Media**. **Martyr*
 | Moniker | Figure | Pts |
 |---|---|---|
 | News Emperor | Rupert Murdoch | 5 |
-| Chin Desk | Tucker Carlson | 4 |
-| Frog Boiler | Alex Jones | 3 |
-| Primetime Bark | Sean Hannity | 2 |
-| Three-Hour Guest | Joe Rogan | 2 |
-| Groyper | Nick Fuentes | 1 |
-| Sting Boy | James O'Keefe | 1 |
+| Nepo Handbiter | Tucker Carlson | 4 |
+| Anal Autohuffer | Alex Jones | 3 |
+| Suspect #3 | Sean Hannity | 2 |
+| Platformer Heels | Joe Rogan | 2 |
+| One of the Good Ones | Nick Fuentes | 1 |
+| Boat/Dildo (Attempted) Rapist | James O'Keefe | 1 |
 
 ## Martyr
 | Moniker | Figure | Pts | Notes |

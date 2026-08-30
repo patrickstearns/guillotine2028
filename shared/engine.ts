@@ -558,8 +558,9 @@ export class GuillotineEngine {
       case 'foreign_support':
       case 'end_day_after_turn':
       case 'move_named_to_front':
-      case 'move_ability_to_front':
         return false;
+      case 'move_ability_to_front':
+        return this.line.filter((n) => nobleById(n.defId)?.ability === effect.ability).length > 1;
       default:
         return true;
     }
@@ -950,6 +951,14 @@ export class GuillotineEngine {
         const i = lineIndex(picks[0]);
         if (i < 0) return 'Invalid figure';
         if (nobleById(this.line[i].defId)?.suit !== effect.suit) return 'Wrong suit';
+        const [card] = this.line.splice(i, 1);
+        this.line.unshift(card);
+        return null;
+      }
+      case 'move_ability_to_front': {
+        const i = lineIndex(picks[0]);
+        if (i < 0) return 'Invalid figure';
+        if (nobleById(this.line[i].defId)?.ability !== effect.ability) return 'Wrong figure';
         const [card] = this.line.splice(i, 1);
         this.line.unshift(card);
         return null;

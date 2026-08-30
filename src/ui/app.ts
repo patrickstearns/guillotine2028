@@ -7,6 +7,16 @@ import { renderWaiting } from './waiting';
 import { renderGame } from './game';
 import { renderResults, startTally } from './results';
 import { runBoardAnimations, snapshotRects } from './fx';
+import {
+  cycleSoundMode,
+  getSoundMode,
+  installClickSfx,
+  onSoundModeChange,
+  setBgmContext,
+  soundModeLabel,
+  unlockSfx,
+  type BgmContext,
+} from './sfx';
 
 type Screen = 'name' | 'lobby' | 'waiting' | 'game' | 'results';
 
@@ -41,8 +51,53 @@ function pinHandRail(rail: HTMLElement | null, expanded: boolean, instant = fals
   }
 }
 
+function syncBgm(): void {
+  let ctx: BgmContext = 'ambient';
+  if (screen === 'name') ctx = 'title';
+  else if (screen === 'game' && gamePublic) {
+    const myId = net.getPlayerId();
+    const me = myId ? gamePublic.players.find((p) => p.id === myId) : undefined;
+    const myTurn =
+      !!myId &&
+      !!me &&
+      !me.isAi &&
+      gamePublic.currentPlayerId === myId &&
+      (gamePublic.phase === 'action' || gamePublic.phase === 'targeting');
+    if (myTurn) ctx = 'myTurn';
+  }
+  setBgmContext(ctx);
+}
+
+function mountSoundButton(): void {
+  let btn = document.getElementById('sound-mode-btn') as HTMLButtonElement | null;
+  if (!btn) {
+    btn = document.createElement('button');
+    btn.id = 'sound-mode-btn';
+    btn.type = 'button';
+    btn.className = 'sound-mode-btn';
+    btn.addEventListener('click', () => {
+      unlockSfx();
+      cycleSoundMode();
+    });
+    document.body.appendChild(btn);
+    onSoundModeChange(() => {
+      if (btn) {
+        btn.dataset.mode = getSoundMode();
+        btn.textContent = soundModeLabel();
+        btn.title = soundModeLabel();
+      }
+    });
+  }
+  btn.dataset.mode = getSoundMode();
+  btn.textContent = soundModeLabel();
+  btn.title = soundModeLabel();
+}
+
 export function mountApp(el: HTMLElement): void {
   root = el;
+  mountSoundButton();
+  installClickSfx(document.body);
+  document.addEventListener('pointerdown', () => unlockSfx(), { once: true, capture: true });
   net.connect({
     onLobby: (l) => {
       lobby = l;
@@ -123,12 +178,15 @@ function commitHeldScores(): void {
 }
 
 function paint(): void {
+  syncBgm();
   if (screen === 'name') {
     root.innerHTML = `
       <div class="screen splash">
         <div class="splash-bg"></div>
         <header class="splash-brand">
-          <h1>Guillotine 2028</h1>
+          <h1 class="splash-logo">
+            <img src="/assets/logo-guillotine-2028.png" alt="Guillotine 2028" />
+          </h1>
         </header>
         <form class="name-form" id="name-form">
           <label for="callsign">Callsign</label>
@@ -602,7 +660,11 @@ function wirePileBrowser(scope: HTMLElement, state: GamePublicState | null): voi
     close();
   });
   scope.querySelector('#pile-browser')?.addEventListener('click', (ev) => {
-    if (ev.target === ev.currentTarget) close();
+    const t = ev.target as Element | null;
+    if (!t?.closest) return;
+    if (t.closest('.card')) return;
+    if (t.closest('.pile-browser-head')) return;
+    close();
   });
 
   if (picking) {
@@ -675,6 +737,7 @@ function wireTargeting(scope: HTMLElement, state: GamePublicState): void {
     'move_back_exact_extra',
     'move_to_front',
     'move_suit_to_front',
+    'move_ability_to_front',
     'remove_from_line',
     'discard_and_replace',
     'give_front_to_player',

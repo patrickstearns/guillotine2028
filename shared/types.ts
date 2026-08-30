@@ -196,6 +196,8 @@ export interface PrivateHand {
 export interface LobbyPlayer {
   id: string;
   name: string;
+  /** Coarse geo from IP, e.g. "California, US" or "Local". */
+  region?: string;
 }
 
 export interface LobbyGameSummary {

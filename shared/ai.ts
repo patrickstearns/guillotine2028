@@ -168,6 +168,16 @@ function bestTargets(
       });
       return best;
     }
+    case 'move_ability_to_front': {
+      let best = { picks: [] as string[], expectedFront: baseline };
+      line.forEach((n, i) => {
+        if (nobleById(n.defId)?.ability !== effect.ability) return;
+        const next = simulateLineAfterMove(line, i, 0);
+        const v = scoreAfter(next);
+        if (v > best.expectedFront) best = { picks: [n.instanceId], expectedFront: v };
+      });
+      return best;
+    }
     case 'remove_from_line':
     case 'discard_and_replace': {
       let best = { picks: [] as string[], expectedFront: baseline };
@@ -298,7 +308,6 @@ function needsTarget(effect: ActionEffect): boolean {
     case 'foreign_support':
     case 'end_day_after_turn':
     case 'move_named_to_front':
-    case 'move_ability_to_front':
       return false;
     default:
       return true;
@@ -559,21 +568,18 @@ export function pumpAi(engine: GuillotineEngine, maxSteps = 60): void {
       const before = s.targeting?.cardInstanceId;
       resolveTargeting(engine);
       const after = engine.getPublicState();
-      // Clerical / infighting multi-step: pause so the next timer tick can show the pick.
+      // Multi-step / player-pick preview: pause so the next timer tick can show the choice.
       if (
         after.phase === 'targeting' &&
         after.targeting?.picks.length &&
         after.targeting.effect &&
-        (after.targeting.effect.kind === 'clerical_error' ||
-          after.targeting.effect.kind === 'discard_n_from_hand' ||
-          after.targeting.effect.kind === 'discard_from_hand') &&
         isPlayerTargetEffect(after.targeting.effect.kind)
       ) {
         return;
       }
       if (after.phase === 'targeting' && after.targeting?.cardInstanceId === before) {
-        // Still stuck — last-ditch dump for Late Night, then bail this tick.
-        if (after.targeting?.effect.kind === 'place_clown') {
+        // Truly stuck with no preview — last-ditch dump for Late Night, then bail this tick.
+        if (after.targeting?.effect.kind === 'place_clown' && !after.targeting.picks.length) {
           const other = pickRandom(after.players.filter((x) => x.id !== p.id));
           if (other) engine.submitTargets(p.id, [other.id]);
         }

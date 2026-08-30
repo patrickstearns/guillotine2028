@@ -35,6 +35,33 @@ body {
   min-height: 100%;
 }
 
+.sound-mode-btn {
+  position: fixed;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 1000;
+  min-width: 6.5rem;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: rgba(28, 20, 16, 0.85);
+  border-color: rgba(243, 232, 216, 0.35);
+}
+
+.sound-mode-btn[data-mode='muted'] {
+  color: var(--muted);
+  opacity: 0.85;
+}
+
+.sound-mode-btn[data-mode='sfx'] {
+  color: var(--accent);
+}
+
+.sound-mode-btn[data-mode='all'] {
+  color: var(--paper);
+}
+
 #app {
   min-height: 100%;
   height: 100%;
@@ -211,17 +238,23 @@ select {
   position: relative;
   z-index: 1;
   text-align: center;
-  padding: 2rem 1rem 0;
+  padding: 1.25rem 1rem 0;
 }
 
-.splash-brand h1 {
-  font-size: clamp(3rem, 12vw, 6rem);
-  margin: 0.2rem 0;
-  color: var(--paper);
-  text-shadow:
-    0 2px 0 #000,
-    0 8px 28px rgba(0, 0, 0, 0.85),
-    0 4px 24px rgba(185, 28, 28, 0.5);
+.splash-brand h1,
+.splash-logo {
+  margin: 0;
+  line-height: 0;
+}
+
+.splash-logo img {
+  display: block;
+  width: min(92vw, 720px);
+  max-height: min(42vh, 320px);
+  height: auto;
+  margin: 0 auto;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 28px rgba(0, 0, 0, 0.75));
 }
 
 .name-form {
@@ -296,9 +329,48 @@ select {
 .lobby-header,
 .waiting-header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
   margin-bottom: 1.25rem;
+}
+
+.lobby-logo {
+  display: block;
+  width: min(42vw, 280px);
+  height: auto;
+  margin: 0 auto 0.55rem;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.65));
+}
+
+.lobby-header h1,
+.waiting-header h1 {
+  margin: 0 0 0.25rem;
+}
+
+.waiting-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  width: 100%;
+  position: relative;
+}
+
+.waiting-header-row #leave-room {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+@media (max-width: 640px) {
+  .waiting-header-row #leave-room {
+    position: static;
+    transform: none;
+  }
 }
 
 .plain-list,
@@ -307,6 +379,19 @@ select {
   list-style: none;
   padding: 0;
   margin: 0;
+}
+
+.lobby-player {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.2rem 0;
+}
+
+.lobby-region {
+  font-size: 0.9em;
+  white-space: nowrap;
 }
 
 .lobby-game {
@@ -669,6 +754,7 @@ button.seat-tile {
   display: flex;
   align-items: center;
   gap: 0.45rem;
+  margin-right: 7rem; /* clear fixed sound-mode button */
 }
 
 .line-stand {
@@ -1180,7 +1266,7 @@ button.seat-tile {
 .card-zoom-overlay {
   position: fixed;
   inset: 0;
-  z-index: 80;
+  z-index: 1200;
   background: rgba(0, 0, 0, 0);
   cursor: zoom-out;
   transition: background 0.28s ease;
@@ -1241,6 +1327,30 @@ button.seat-tile {
   pointer-events: auto;
 }
 
+.hand-block-banner {
+  position: absolute;
+  left: 50%;
+  top: 0.35rem;
+  transform: translateX(-50%);
+  z-index: 2;
+  max-width: min(92vw, 28rem);
+  padding: 0.3rem 0.7rem;
+  border: 1px solid rgba(243, 232, 216, 0.28);
+  background: rgba(28, 20, 16, 0.92);
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-align: center;
+  line-height: 1.25;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.hand-rail:has(.hand-block-banner) .hand-cards {
+  padding-top: 2rem;
+}
+
 .hand-rail:hover,
 .hand-rail:focus-within,
 .hand-rail.hand-up {
@@ -1292,7 +1402,7 @@ button.seat-tile {
 .pile-browser {
   position: fixed;
   inset: 0;
-  z-index: 70;
+  z-index: 1100;
   display: flex;
   flex-direction: column;
   background: rgba(0, 0, 0, 0.78);
@@ -1300,10 +1410,12 @@ button.seat-tile {
 
 .pile-browser-head {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.75rem 1.25rem;
-  padding: 1rem 1.25rem 0.5rem;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: center;
+  text-align: center;
+  gap: 0.45rem;
+  padding: 1rem 1.25rem 0.65rem;
 }
 
 .pile-browser-head h2 {
@@ -1315,7 +1427,12 @@ button.seat-tile {
 .pile-browser-head p {
   margin: 0;
   color: var(--muted);
-  flex: 1;
+  flex: 0 1 auto;
+  max-width: 36rem;
+}
+
+.pile-browser-close {
+  margin-top: 0.15rem;
 }
 
 .pile-browser-cards {

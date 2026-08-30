@@ -1,5 +1,6 @@
 import type { AnimEvent } from '../../shared/types';
 import { actionCardHtml, cardBackHtml, nobleCardHtml } from './cards';
+import { playSfx } from './sfx';
 
 const FLY_MS = 1200;
 const FLIP_MS = 1800;
@@ -89,6 +90,7 @@ export function runBoardAnimations(opts: {
       lastDrawPlayer = ev.playerId;
       const delay = drawDelay;
       drawDelay += DRAW_CARD_STAGGER_MS;
+      window.setTimeout(() => playSfx('deal'), delay);
       fly(
         layer,
         cardBackHtml('action'),
@@ -169,6 +171,7 @@ export function runBoardAnimations(opts: {
       const fromDeck =
         opts.prev?.get('noble-draw-pile-card') ?? opts.prev?.get('noble-draw-pile') ?? next.get('noble-draw-pile-card');
       window.setTimeout(() => {
+        playSfx('deal');
         slot?.classList.remove('is-dealing');
         const dest = live ? live.getBoundingClientRect() : undefined;
         fly(layer, html, fromDeck, dest, {
@@ -221,6 +224,7 @@ export function runBoardAnimations(opts: {
       if (live) live.style.opacity = '0';
       const delay = collectI * COLLECT_STAGGER_MS;
       collectI += 1;
+      if (ev.fromDeck) window.setTimeout(() => playSfx('deal'), delay);
       sliceThenFly(layer, html, from, to, delay, () => {
         if (live) {
           live.style.opacity = '';
@@ -373,7 +377,10 @@ function sliceThenFly(
   wrap.style.height = `${from.height}px`;
   wrap.innerHTML = `<div class="fx-half top">${html}</div><div class="fx-half bottom">${html}</div>`;
   layer.appendChild(wrap);
-  window.setTimeout(() => wrap.classList.add('cut'), delay);
+  window.setTimeout(() => {
+    playSfx('slice');
+    wrap.classList.add('cut');
+  }, delay);
   window.setTimeout(() => {
     wrap.remove();
     fly(layer, html, from, to, { onDone });

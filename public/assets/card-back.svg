@@ -11,5 +11,5 @@
     <path d="M-34,-78 L34,-78 L28,-52 L-28,-52 Z" fill="#94a3b8"/>
     <path d="M-18,52 h36 v16 h-36z" fill="#e7e5e4"/>
   </g>
-  <text x="100" y="248" text-anchor="middle" font-family="Georgia, serif" font-size="28" font-weight="700" fill="#f3e8d8" stroke="#1c1917" stroke-width="1.5">2028</text>
+  <text x="100" y="248" text-anchor="middle" font-family="Georgia, serif" font-size="22" font-weight="700" fill="#f3e8d8" stroke="#1c1917" stroke-width="1.2" letter-spacing="2">ACTIONS</text>
 </svg>

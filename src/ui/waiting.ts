@@ -31,11 +31,11 @@ export function renderWaiting(room: RoomView, myId: string): string {
     <div class="screen waiting">
       <div class="waiting-inner">
         <header class="waiting-header">
-          <div>
-            <p class="eyebrow">Waiting lobby</p>
+          <img class="lobby-logo" src="/assets/logo-guillotine-2028.png" alt="Guillotine 2028" />
+          <div class="waiting-header-row">
             <h1>${escape(room.name)}</h1>
+            <button type="button" id="leave-room" class="ghost">Leave</button>
           </div>
-          <button type="button" id="leave-room" class="ghost">Leave</button>
         </header>
         <ul class="seat-tiles" style="--seat-cols:${room.maxPlayers}">${filledTiles}${ghostTiles}</ul>
         ${

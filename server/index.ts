@@ -8,6 +8,7 @@ import { GuillotineEngine } from '../shared/engine.js';
 import { aiShouldAct, pumpAi } from '../shared/ai.js';
 import { buildHouseRules } from '../shared/houseRules.js';
 import { pickAiName } from '../shared/aiNames.js';
+import { clientIp, lookupRegion } from './geo.js';
 import type { HouseRules, LobbyGameSummary, LobbyPlayer } from '../shared/types.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -30,11 +31,19 @@ interface Room {
   engine: GuillotineEngine | null;
 }
 
+type SocketMeta = {
+  playerId: string;
+  name: string;
+  roomId: string | null;
+  region?: string;
+};
+
 const lobbyPlayers = new Map<string, LobbyPlayer & { socketId: string }>();
 const rooms = new Map<string, Room>();
-const socketMeta = new Map<string, { playerId: string; name: string; roomId: string | null }>();
+const socketMeta = new Map<string, SocketMeta>();
 
 const app = express();
+app.set('trust proxy', 1);
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: { origin: '*' },
@@ -52,7 +61,7 @@ const AFK_MS = 120_000;
 
 function lobbySnapshot() {
   return {
-    players: [...lobbyPlayers.values()].map(({ id, name }) => ({ id, name })),
+    players: [...lobbyPlayers.values()].map(({ id, name, region }) => ({ id, name, region })),
     games: [...rooms.values()]
       .filter((r) => r.engine?.getPublicState().phase !== 'results')
       .map(
@@ -70,6 +79,20 @@ function lobbySnapshot() {
         }),
       ),
   };
+}
+
+function putLobbyPlayer(meta: SocketMeta, socketId: string): void {
+  lobbyPlayers.set(meta.playerId, {
+    id: meta.playerId,
+    name: meta.name,
+    region: meta.region,
+    socketId,
+  });
+}
+
+async function ensureRegion(socket: Socket, meta: SocketMeta): Promise<void> {
+  if (meta.region && meta.region !== 'Unknown') return;
+  meta.region = await lookupRegion(clientIp(socket));
 }
 
 function destroyRoom(room: Room): void {
@@ -185,6 +208,7 @@ function dropIdleHuman(room: Room, playerId: string): void {
         lobbyPlayers.set(meta.playerId, {
           id: meta.playerId,
           name: meta.name,
+          region: meta.region,
           socketId: sock.id,
         });
       }
@@ -334,11 +358,13 @@ function scheduleAiPump(room: Room, wait = 1800): void {
 }
 
 io.on('connection', (socket: Socket) => {
-  socket.on('lobby:join', (payload: { name: string }, cb?: (r: unknown) => void) => {
+  socket.on('lobby:join', async (payload: { name: string }, cb?: (r: unknown) => void) => {
     const name = (payload?.name || 'Player').trim().slice(0, 24) || 'Player';
     const playerId = randomUUID();
-    lobbyPlayers.set(playerId, { id: playerId, name, socketId: socket.id });
-    socketMeta.set(socket.id, { playerId, name, roomId: null });
+    const region = await lookupRegion(clientIp(socket));
+    const meta: SocketMeta = { playerId, name, roomId: null, region };
+    lobbyPlayers.set(playerId, { id: playerId, name, region, socketId: socket.id });
+    socketMeta.set(socket.id, meta);
     socket.join('lobby');
     broadcastLobby();
     cb?.({ ok: true, playerId, name, lobby: lobbySnapshot() });
@@ -391,14 +417,14 @@ io.on('connection', (socket: Socket) => {
     socket.leave('lobby');
     socket.join(roomId);
     meta.roomId = roomId;
-    lobbyPlayers.delete(meta.playerId);
+      lobbyPlayers.delete(meta.playerId);
     const res = startRoomEngine(room, 4);
     if (!res.ok) {
       rooms.delete(roomId);
       meta.roomId = null;
       socket.leave(roomId);
       socket.join('lobby');
-      lobbyPlayers.set(meta.playerId, { id: meta.playerId, name: meta.name, socketId: socket.id });
+      putLobbyPlayer(meta, socket.id);
       return cb?.({ ok: false, error: res.error });
     }
     broadcastLobby();
@@ -658,10 +684,10 @@ function returnSeatToLobby(seat: Seat, roomId: string): void {
   sock.join('lobby');
   if (meta) {
     meta.roomId = null;
-    lobbyPlayers.set(meta.playerId, {
-      id: meta.playerId,
-      name: meta.name,
-      socketId: sock.id,
+    putLobbyPlayer(meta, sock.id);
+    void ensureRegion(sock, meta).then(() => {
+      putLobbyPlayer(meta, sock.id);
+      broadcastLobby();
     });
   }
 }
@@ -679,11 +705,7 @@ function leaveRoom(socket: Socket): void {
   const meta = socketMeta.get(socket.id);
   if (!meta?.roomId) {
     if (meta) {
-      lobbyPlayers.set(meta.playerId, {
-        id: meta.playerId,
-        name: meta.name,
-        socketId: socket.id,
-      });
+      putLobbyPlayer(meta, socket.id);
       socket.join('lobby');
       broadcastLobby();
     }
@@ -714,13 +736,13 @@ function leaveRoom(socket: Socket): void {
     }
   }
   meta.roomId = null;
-  lobbyPlayers.set(meta.playerId, {
-    id: meta.playerId,
-    name: meta.name,
-    socketId: socket.id,
-  });
+  putLobbyPlayer(meta, socket.id);
   socket.join('lobby');
   broadcastLobby();
+  void ensureRegion(socket, meta).then(() => {
+    putLobbyPlayer(meta, socket.id);
+    broadcastLobby();
+  });
 }
 
 httpServer.listen(PORT, () => {

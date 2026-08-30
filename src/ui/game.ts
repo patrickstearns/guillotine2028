@@ -1,5 +1,5 @@
 import { actionById, nobleById } from '../../shared/cards';
-import { actionPlayBlock, PLAYER_TARGET_KINDS } from '../../shared/playable';
+import { actionPlayBlock, frontBlocksActions, PLAYER_TARGET_KINDS } from '../../shared/playable';
 import type { ActionEffect, GamePublicState, PrivateHand } from '../../shared/types';
 import { actionCardHtml, nobleCardHtml, cardBackHtml, skipCardHtml } from './cards';
 
@@ -11,6 +11,7 @@ const LINE_PICK_KINDS: ActionEffect['kind'][] = [
   'move_to_front',
   'move_suit_forward',
   'move_suit_to_front',
+  'move_ability_to_front',
   'remove_from_line',
   'discard_and_replace',
   'rearrange_front_n',
@@ -144,6 +145,15 @@ export function renderGame(
   const inboundNobleDiscard = (state.anims ?? []).some((a) => a.type === 'discard_noble');
   const pickingHand = targeting && effect?.kind === 'discard_n_from_hand' && infightStep === 1;
   const canSkip = state.phase === 'action' && state.currentPlayerId === myId && !targeting;
+  const actionBlockCause =
+    canSkip && state.actionLocked
+      ? 'Rush Job'
+      : canSkip && frontBlocksActions(state)
+        ? nobleById(state.line[0]?.defId)?.name ?? 'the front figure'
+        : null;
+  const actionBlockBanner = actionBlockCause
+    ? `<div class="hand-block-banner" role="status">Unable to play Action Cards due to ${escape(actionBlockCause)}</div>`
+    : '';
   const handHtml = `${hand.hand
     .map((c) => {
       const def = actionById(c.defId);
@@ -239,6 +249,7 @@ export function renderGame(
 
         <div class="hand-dock"></div>
         <div class="hand-rail ${myTurn || pickingHand ? 'can-play' : ''}" id="hand-rail">
+          ${actionBlockBanner}
           <div class="hand-cards">${handHtml || '<p class="muted">Empty hand</p>'}</div>
         </div>
       </div>
@@ -264,6 +275,9 @@ function lineCardSelectable(state: GamePublicState, defId: string, index: number
   if (effect.kind === 'move_suit_forward' || effect.kind === 'move_suit_to_front') {
     return nobleById(defId)?.suit === effect.suit;
   }
+  if (effect.kind === 'move_ability_to_front') {
+    return nobleById(defId)?.ability === effect.ability;
+  }
   if (effect.kind === 'rearrange_front_n') {
     return index < Math.min(effect.n, state.line.length);
   }
@@ -284,6 +298,8 @@ function targetHint(effect: ActionEffect, lineLen: number, clericalStep = -1, la
     case 'remove_from_line':
     case 'discard_and_replace':
       return `<p>Click a figure in the line.</p>`;
+    case 'move_ability_to_front':
+      return `<p>Click which Overzealous Staffer to move to the front.</p>`;
     case 'rearrange_front_n': {
       const k = Math.min(effect.n, lineLen);
       return `<p>Click ${k} figure${k === 1 ? '' : 's'} in the new order.</p>`;
@@ -362,7 +378,7 @@ function pileBrowserHtml(
     <div class="pile-browser-head">
       <h2>${title}</h2>
       ${picking ? '<p>Click a card to take it. Scroll-wheel to zoom.</p>' : '<p>Scroll-wheel to zoom. Click the backdrop or Close to leave.</p>'}
-      ${picking ? '' : '<button type="button" id="pile-browser-close" class="ghost">Close</button>'}
+      ${picking ? '' : '<button type="button" id="pile-browser-close" class="ghost pile-browser-close">Close</button>'}
     </div>
     <div class="pile-browser-cards">${cards || '<p class="muted">Empty</p>'}</div>
   </div>`;

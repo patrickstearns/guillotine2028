@@ -21,16 +21,20 @@ export function renderLobby(lobby: LobbySnapshot, myName: string): string {
     })
     .join('');
 
-  const players = lobby.players.map((p) => `<li>${escape(p.name)}</li>`).join('') || '<li class="muted">No one else here yet</li>';
+  const players =
+    lobby.players
+      .map((p) => {
+        const region = p.region ? `<span class="muted lobby-region">${escape(p.region)}</span>` : '';
+        return `<li class="lobby-player"><strong>${escape(p.name)}</strong>${region}</li>`;
+      })
+      .join('') || '<li class="muted">No one else here yet</li>';
 
   return `
     <div class="screen lobby">
       <header class="lobby-header">
-        <div>
-          <p class="eyebrow">Guillotine 2028</p>
-          <h1>Lobby</h1>
-          <p class="muted">Signed in as <strong>${escape(myName)}</strong></p>
-        </div>
+        <img class="lobby-logo" src="/assets/logo-guillotine-2028.png" alt="Guillotine 2028" />
+        <h1>Lobby</h1>
+        <p class="muted">Signed in as <strong>${escape(myName)}</strong></p>
       </header>
       <div class="lobby-grid">
         <section class="panel">
