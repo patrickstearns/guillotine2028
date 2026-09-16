@@ -543,6 +543,19 @@ button.seat-tile {
   z-index: 1;
 }
 
+.hand-peek-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.58);
+}
+
+.hand-peek-overlay.selecting-wait .hand-peek-panel {
+  min-width: min(420px, 90vw);
+}
+
 .sidebar {
   position: fixed;
   left: 0;
@@ -1151,16 +1164,7 @@ button.seat-tile {
 .player-pick-overlay {
   position: fixed;
   inset: 0;
-  z-index: 76;
-  display: grid;
-  place-items: center;
-  background: rgba(0, 0, 0, 0.58);
-}
-
-.hand-peek-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 76;
+  z-index: 90;
   display: grid;
   place-items: center;
   background: rgba(0, 0, 0, 0.58);

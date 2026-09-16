@@ -51,8 +51,8 @@ Suits are **Executive**, **Legislative**, **Judicial**, and **Media**. **Martyr*
 | News Emperor | Rupert Murdoch | 5 |
 | Nepo Handbiter | Tucker Carlson | 4 |
 | Anal Autohuffer | Alex Jones | 3 |
-| Suspect #3 | Sean Hannity | 2 |
-| Platformer Heels | Joe Rogan | 2 |
+| Individual #3 | Sean Hannity | 2 |
+| Platformer of Heels | Joe Rogan | 2 |
 | One of the Good Ones | Nick Fuentes | 1 |
 | Boat/Dildo (Attempted) Rapist | James O'Keefe | 1 |
 
@@ -63,4 +63,4 @@ Suits are **Executive**, **Legislative**, **Judicial**, and **Media**. **Martyr*
 | Late Night | Jimmy Kimmel | −2 | Goes to another pile |
 | Confused Tourist | (generic) | −1 | Discard an action |
 | Jan. 6er | Jan. 6er ×3 | −1 | |
-| Devil Without a Cause | Meat Loaf | −1× | −1 per Martyr |
+| Feel the Bern | Bernie Sanders | −1× | −1 per Martyr |

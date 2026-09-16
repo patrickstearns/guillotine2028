@@ -93,6 +93,8 @@ export function actionIsPlayable(state: GamePublicState, effect: ActionEffect, a
       return state.players.some((p) => p.id !== actorId && p.collected.length > 0);
     case 'from_discard':
       return (state.actionDiscard?.length ?? state.discardCount ?? 0) > 0;
+    case 'late_arrival':
+      return (state.nobleDeckCount ?? 0) > 0;
     case 'clerical_error':
       return state.players.some((p) => p.id !== actorId && p.collected.length > 0);
     case 'discard_n_from_hand':

@@ -46,8 +46,8 @@ export const NOBLES: NobleDef[] = [
   { id: 'murdoch', name: 'News Emperor', realName: 'Rupert Murdoch', suit: 'media', points: 5, ability: 'none', blurb: '' },
   { id: 'tucker', name: 'Nepo Handbiter', realName: 'Tucker Carlson', suit: 'media', points: 4, ability: 'none', blurb: '' },
   { id: 'alex_jones', name: 'Anal Autohuffer', realName: 'Alex Jones', suit: 'media', points: 3, ability: 'none', blurb: '' },
-  { id: 'hannity', name: 'Suspect #3', realName: 'Sean Hannity', suit: 'media', points: 2, ability: 'none', blurb: '' },
-  { id: 'rogan', name: 'Platformer Heels', realName: 'Joe Rogan', suit: 'media', points: 2, ability: 'none', blurb: '' },
+  { id: 'hannity', name: 'Individual #3', realName: 'Sean Hannity', suit: 'media', points: 2, ability: 'none', blurb: '' },
+  { id: 'rogan', name: 'Platformer of Heels', realName: 'Joe Rogan', suit: 'media', points: 2, ability: 'none', blurb: '' },
   { id: 'fuentes', name: 'One of the Good Ones', realName: 'Nick Fuentes', suit: 'media', points: 1, ability: 'none', blurb: '' },
   { id: 'okeefe', name: 'Boat/Dildo (Attempted) Rapist', realName: "James O'Keefe", suit: 'media', points: 1, ability: 'none', blurb: '' },
 
@@ -56,7 +56,7 @@ export const NOBLES: NobleDef[] = [
   { id: 'kimmel', name: 'Late Night', realName: 'Jimmy Kimmel', suit: 'martyr', points: -2, ability: 'clown', blurb: 'When collected, place this into another player’s score pile.' },
   { id: 'confused', name: 'Confused Tourist', realName: 'Confused tourist', suit: 'martyr', points: -1, ability: 'innocent_victim', blurb: 'Discard an action card from your hand after you collect this.' },
   { id: 'jan6', name: 'Jan. 6er', realName: 'Jan. 6er', suit: 'martyr', points: -1, ability: 'none', blurb: '', copies: 3 },
-  { id: 'meat_loaf', name: 'Devil Without a Cause', realName: 'Meat Loaf', suit: 'martyr', points: -1, ability: 'tragic_figure', blurb: 'Worth −1 for every Martyr in your pile (including this).' },
+  { id: 'sanders', name: 'Feel the Bern', realName: 'Bernie Sanders', suit: 'martyr', points: -1, ability: 'tragic_figure', blurb: 'Worth −1 for every Martyr in your pile (including this).' },
 ];
 
 export function expandNobles(): NobleDef[] {
@@ -103,7 +103,7 @@ export const ACTIONS: ActionDef[] = [
   { id: 'long_walk', name: 'The Long Walk', text: 'Reverse the order of the line.', effect: { kind: 'reverse_line' } },
   { id: 'mass_confusion', name: 'Mass Confusion', text: 'Return the line to the deck, shuffle, and deal a new line.', effect: { kind: 'redeal_line' } },
   { id: 'extra_live', name: 'Extra Load', text: 'Add 3 figures from the deck to the end of the line.', effect: { kind: 'add_nobles_to_end', count: 3 }, copies: 2 },
-  { id: 'late_arrival', name: 'Late Arrival', text: 'Look at the top 3 of the figures deck; put one at the end of the line.', effect: { kind: 'late_arrival' } },
+  { id: 'late_arrival', name: 'Late Arrival', text: 'Look at the top 3 of the figures deck; put one at the end of the line. Put the others back on top.', effect: { kind: 'late_arrival' } },
   { id: 'leak_dump', name: 'Leak Dump', text: 'Take any one card of your choice from the action discard pile.', effect: { kind: 'from_discard' } },
   { id: 'pol_influence', name: 'Political Influence', text: 'Draw 3 action cards. Do not collect a figure this turn.', effect: { kind: 'draw_skip_collect', count: 3 }, copies: 2 },
   { id: 'rain_delay', name: 'Rain Delay', text: 'All players discard their hands and draw new hands of equal size.', effect: { kind: 'rain_delay' } },

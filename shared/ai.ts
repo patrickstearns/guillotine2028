@@ -282,6 +282,17 @@ function bestTargets(
         expectedFront: scoreAfter(line) + (other ? 0.5 : 0),
       };
     }
+    case 'late_arrival': {
+      const peek = engine.getPrivateHand(playerId).peekNobles?.cards ?? [];
+      if (!peek.length) return { picks: [], expectedFront: scoreAfter(line) + 0.15 };
+      const best = [...peek].sort(
+        (a, b) => collectValue(engine, playerId, b) - collectValue(engine, playerId, a),
+      )[0];
+      return {
+        picks: best ? [best.instanceId] : [],
+        expectedFront: scoreAfter(line) + 0.15,
+      };
+    }
     default:
       return { picks: [], expectedFront: scoreAfter(line) };
   }
@@ -296,7 +307,6 @@ function needsTarget(effect: ActionEffect): boolean {
     case 'escape':
     case 'redeal_line':
     case 'add_nobles_to_end':
-    case 'late_arrival':
     case 'collect_extra_front':
     case 'draw_skip_collect':
     case 'rain_delay':
@@ -486,6 +496,14 @@ function resolveTargeting(engine: GuillotineEngine): void {
     const peek = engine.getPrivateHand(me.id).peekHand?.cards ?? [];
     const dump = pickRandom(peek);
     if (dump) engine.submitTargets(me.id, [t.picks[0], dump.instanceId]);
+    return;
+  }
+  if (t.effect.kind === 'late_arrival') {
+    const peek = engine.getPrivateHand(me.id).peekNobles?.cards ?? [];
+    const best = [...peek].sort(
+      (a, b) => collectValue(engine, me.id, b) - collectValue(engine, me.id, a),
+    )[0];
+    if (best) engine.submitTargets(me.id, [best.instanceId]);
     return;
   }
   if (t.effect.kind === 'clerical_error') {

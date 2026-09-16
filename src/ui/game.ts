@@ -54,7 +54,8 @@ export function renderGame(
       lackStep !== 1) ||
     (effect.kind === 'clerical_error' && clericalStep === 0) ||
     (effect.kind === 'discard_from_hand' && lackStep === 0) ||
-    effect.kind === 'from_discard';
+    effect.kind === 'from_discard' ||
+    effect.kind === 'late_arrival';
   const hint = hideHint ? '' : targetHint(effect, state.line.length, clericalStep, lackStep);
 
   const sidebar = state.players
@@ -256,7 +257,9 @@ export function renderGame(
 
       ${reveal}
       ${playerPickDialog(state, myId)}
-      ${handPeekHtml(hand, targeting && lackStep === 1)}
+      ${handPeekHtml(state, hand, myId)}
+      ${noblePeekHtml(state, hand, myId)}
+      ${selectingWaitHtml(state, myId)}
       ${pileBrowserHtml(state, myId, pileBrowse)}
       ${state.toast ? `<div class="toast" id="toast">${escape(state.toast)}</div>` : ''}
     </div>
@@ -320,6 +323,8 @@ function targetHint(effect: ActionEffect, lineLen: number, clericalStep = -1, la
       return lackStep === 1
         ? `<p>Click a card in their hand to discard.</p>`
         : `<p>Click a player on the left — look at their hand.</p>`;
+    case 'late_arrival':
+      return `<p>Click one figure to put at the end of the line.</p>`;
     case 'clerical_error':
       if (clericalStep === 2) return `<p>Click a figure in their score pile to take.</p>`;
       return `<p>Click a figure in their score pile to take.</p>`;
@@ -334,16 +339,49 @@ function targetHint(effect: ActionEffect, lineLen: number, clericalStep = -1, la
   }
 }
 
-function handPeekHtml(hand: PrivateHand, active: boolean): string {
+function handPeekHtml(state: GamePublicState, hand: PrivateHand, myId: string): string {
+  const t = state.targeting;
+  if (!t || t.playerId !== myId || t.effect.kind !== 'discard_from_hand' || (t.step ?? 0) !== 1) {
+    return '';
+  }
   const peek = hand.peekHand;
-  if (!active || !peek?.cards.length) return '';
-  const cards = peek.cards
+  const ownerName = peek?.ownerName ?? state.players.find((p) => p.id === t.picks[0])?.name ?? 'Player';
+  const cards = (peek?.cards ?? [])
     .map((c) => actionCardHtml(c, { selectable: true }))
     .join('');
-  return `<div class="hand-peek-overlay" id="hand-peek">
+  return `<div class="hand-peek-overlay" id="hand-peek" role="dialog" aria-label="${escape(ownerName)}'s hand">
     <div class="hand-peek-panel">
-      <p>${escape(peek.ownerName)}'s hand — click a card to discard</p>
-      <div class="hand-peek-cards">${cards}</div>
+      <p>${escape(ownerName)}'s hand — click a card to discard</p>
+      <div class="hand-peek-cards">${cards || '<p class="muted">Empty hand</p>'}</div>
+    </div>
+  </div>`;
+}
+
+function noblePeekHtml(state: GamePublicState, hand: PrivateHand, myId: string): string {
+  const t = state.targeting;
+  if (!t || t.playerId !== myId || t.effect.kind !== 'late_arrival') return '';
+  const cards = (hand.peekNobles?.cards ?? [])
+    .map((n) => nobleCardHtml(n, { selectable: true, houseRules: state.houseRules }))
+    .join('');
+  return `<div class="hand-peek-overlay" id="noble-peek" role="dialog" aria-label="Late Arrival">
+    <div class="hand-peek-panel">
+      <p>Late Arrival — choose one figure for the end of the line</p>
+      <div class="hand-peek-cards">${cards || '<p class="muted">No figures</p>'}</div>
+    </div>
+  </div>`;
+}
+
+/** Shown to everyone except the chooser during private card selection. */
+function selectingWaitHtml(state: GamePublicState, myId: string): string {
+  const t = state.targeting;
+  if (!t || t.playerId === myId) return '';
+  const lackSelecting = t.effect.kind === 'discard_from_hand' && (t.step ?? 0) === 1;
+  const lateSelecting = t.effect.kind === 'late_arrival';
+  if (!lackSelecting && !lateSelecting) return '';
+  const who = state.players.find((p) => p.id === t.playerId)?.name ?? 'Player';
+  return `<div class="hand-peek-overlay selecting-wait" id="selecting-wait" role="status">
+    <div class="hand-peek-panel">
+      <p>${escape(who)} is selecting a card</p>
     </div>
   </div>`;
 }
@@ -447,8 +485,20 @@ function playerPickDialog(state: GamePublicState, myId: string): string {
 function turnLabel(state: GamePublicState, myId: string): string {
   if (state.phase === 'day_intro') return `Day ${state.day}`;
   if (state.phase === 'targeting') {
-    const who = state.players.find((p) => p.id === state.targeting?.playerId);
-    return who?.id === myId ? 'Choose targets' : `${who?.name ?? 'Player'} is choosing…`;
+    const t = state.targeting;
+    const who = state.players.find((p) => p.id === t?.playerId);
+    if (who?.id === myId) {
+      if (t?.effect.kind === 'discard_from_hand' && (t.step ?? 0) === 1) return 'Select a card to discard';
+      if (t?.effect.kind === 'late_arrival') return 'Choose a figure for the line';
+      return 'Choose targets';
+    }
+    if (
+      (t?.effect.kind === 'discard_from_hand' && (t.step ?? 0) === 1) ||
+      t?.effect.kind === 'late_arrival'
+    ) {
+      return `${who?.name ?? 'Player'} is selecting a card`;
+    }
+    return `${who?.name ?? 'Player'} is choosing…`;
   }
   const cur = state.players.find((p) => p.id === state.currentPlayerId);
   if (!cur) return '';

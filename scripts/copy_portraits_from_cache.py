@@ -18,7 +18,7 @@ IDS = [
     "clerk", "mcconnell", "mike_johnson", "mccarthy", "cruz", "pelosi", "schumer",
     "roberts", "alito", "thomas", "barrett", "gorsuch", "kavanaugh", "cannon", "rival", "leaky_clerk",
     "murdoch", "tucker", "alex_jones", "hannity", "rogan", "fuentes", "okeefe",
-    "luigi", "kimmel", "confused", "jan6", "meat_loaf",
+    "luigi", "kimmel", "confused", "jan6", "sanders",
 ]
 
 

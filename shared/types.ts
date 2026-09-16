@@ -191,6 +191,8 @@ export interface PrivateHand {
   hand: ActionInstance[];
   /** Lack of Support: victim hand visible only to the chooser. */
   peekHand?: { ownerId: string; ownerName: string; cards: ActionInstance[] } | null;
+  /** Late Arrival: top figures visible only to the chooser. */
+  peekNobles?: { cards: NobleInstance[] } | null;
 }
 
 export interface LobbyPlayer {

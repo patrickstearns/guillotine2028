@@ -861,6 +861,18 @@ function wireTargeting(scope: HTMLElement, state: GamePublicState): void {
     });
   }
 
+  if (effect.kind === 'late_arrival') {
+    scope.querySelectorAll('#noble-peek .card-noble.selectable').forEach((el) => {
+      el.addEventListener('click', (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        const id = (el as HTMLElement).dataset.instance!;
+        if (!id) return;
+        commit([id]);
+      });
+    });
+  }
+
   if (effect.kind === 'clerical_error') {
     const victimId = state.targeting?.picks[0];
     const step = state.targeting?.step ?? 0;

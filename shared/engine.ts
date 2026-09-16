@@ -77,6 +77,8 @@ export class GuillotineEngine {
   private collectPaused: 'after_first' | 'after_extra' | null = null;
   private pendingClownCard: NobleInstance | null = null;
   private pendingFrontCard: ActionInstance | null = null;
+  /** Late Arrival: top-of-deck figures held privately for the chooser. */
+  private pendingPeekNobles: NobleInstance[] | null = null;
 
   private catalogDeal = false;
   private catalogPlayerId: string | null = null;
@@ -178,6 +180,7 @@ export class GuillotineEngine {
     this.actionDiscard = [];
     this.nobleDiscard = [];
     this.pendingReveal = null;
+    this.pendingPeekNobles = null;
     for (const p of this.players) {
       p.hand = [];
       p.collected = [];
@@ -378,6 +381,9 @@ export class GuillotineEngine {
         };
       }
     }
+    if (t?.effect.kind === 'late_arrival' && t.playerId === playerId && this.pendingPeekNobles?.length) {
+      result.peekNobles = { cards: [...this.pendingPeekNobles] };
+    }
     return result;
   }
 
@@ -546,7 +552,6 @@ export class GuillotineEngine {
       case 'escape':
       case 'redeal_line':
       case 'add_nobles_to_end':
-      case 'late_arrival':
       case 'collect_extra_front':
       case 'draw_skip_collect':
       case 'rain_delay':
@@ -559,6 +564,8 @@ export class GuillotineEngine {
       case 'end_day_after_turn':
       case 'move_named_to_front':
         return false;
+      case 'late_arrival':
+        return this.nobleDeck.length > 0;
       case 'move_ability_to_front':
         return this.line.filter((n) => nobleById(n.defId)?.ability === effect.ability).length > 1;
       default:
@@ -577,6 +584,23 @@ export class GuillotineEngine {
       if (this.phase === 'results' || this.phase === 'between_days') return { ok: true };
       if (this.actionsRemaining > 0 && this.phase === 'action') return { ok: true };
       return this.deferCollect();
+    }
+    if (effect.kind === 'late_arrival') {
+      const drawn: NobleInstance[] = [];
+      const n = Math.min(3, this.nobleDeck.length);
+      for (let i = 0; i < n; i++) {
+        const top = this.nobleDeck.pop();
+        if (top) drawn.push(top);
+      }
+      this.pendingPeekNobles = drawn;
+      if (!drawn.length) {
+        this.moveMasterSpies();
+        if (this.actionsRemaining > 0) {
+          this.phase = 'action';
+          return { ok: true };
+        }
+        return this.deferCollect();
+      }
     }
     this.phase = 'targeting';
     this.targeting = {
@@ -620,13 +644,14 @@ export class GuillotineEngine {
       }
       case 'redeal_line': {
         const returning = [...this.line];
+        const dealCount = returning.length;
         this.line = [];
         for (const card of returning) {
           this.pendingAnims.push({ type: 'return_to_deck', instanceId: card.instanceId, defId: card.defId });
           this.nobleDeck.push({ instanceId: uid(), defId: card.defId });
         }
         this.nobleDeck = shuffle(this.nobleDeck);
-        for (let i = 0; i < this.lineSize && this.nobleDeck.length; i++) {
+        for (let i = 0; i < dealCount && this.nobleDeck.length; i++) {
           const n = this.nobleDeck.pop()!;
           this.dealNobleToLine(n);
         }
@@ -638,15 +663,6 @@ export class GuillotineEngine {
           if (n) this.dealNobleToLine(n);
         }
         break;
-      case 'late_arrival': {
-        const top = this.nobleDeck.splice(-3);
-        if (top.length) {
-          const pick = top.pop()!;
-          this.dealNobleToLine(pick);
-          this.nobleDeck.push(...shuffle(top));
-        }
-        break;
-      }
       case 'collect_extra_front':
         this.pendingExtraCollect = true;
         break;
@@ -1077,6 +1093,20 @@ export class GuillotineEngine {
         const tmp = player.hand;
         player.hand = other.hand;
         other.hand = tmp;
+        return null;
+      }
+      case 'late_arrival': {
+        const pending = this.pendingPeekNobles;
+        if (!pending?.length) return 'No figures to choose';
+        const i = pending.findIndex((c) => c.instanceId === picks[0]);
+        if (i < 0) return 'Invalid figure';
+        const [chosen] = pending.splice(i, 1);
+        this.dealNobleToLine(chosen);
+        // Restore remaining top-first: last push is the new top of deck.
+        for (let j = pending.length - 1; j >= 0; j--) {
+          this.nobleDeck.push(pending[j]!);
+        }
+        this.pendingPeekNobles = null;
         return null;
       }
       case 'place_clown': {
