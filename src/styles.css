@@ -1178,7 +1178,7 @@ button.seat-tile {
   text-align: center;
 }
 
-.hand-peek-panel p {
+.hand-peek-panel > p {
   margin: 0 0 1rem;
   font-family: var(--font-display);
   font-size: 1.35rem;
